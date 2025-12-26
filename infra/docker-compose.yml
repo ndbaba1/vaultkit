@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  control-plane:
+    build: ../control-plane
+    container_name: vaultkit-control-plane
+    env_file:
+      - ./secrets/.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_started
+      funl-runtime:
+        condition: service_started
+    volumes:
+      - ../control-plane:/app
+    command: bash -c "bundle exec rails s -b 0.0.0.0"
+
+  funl-runtime:
+    build: ../funl-runtime
+    container_name: vaultkit-funl
+    env_file:
+      - ./secrets/.env
+    environment:
+      VKIT_PUBLIC_KEY: /secrets/vkit_pub.pem
+    volumes:
+      - ./secrets/vkit_pub.pem:/secrets/vkit_pub.pem:ro
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: vaultkit-db
+    env_file:
+      - ./secrets/.env
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
