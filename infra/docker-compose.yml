@@ -6,10 +6,6 @@ services:
     container_name: vaultkit-control-plane
     env_file:
       - ./secrets/.env
-    environment:
-      RAILS_ENV: development
-      VKIT_PRIVATE_KEY: /secrets/keys/vkit_priv.pem
-      FUNL_URL: http://funl-runtime:8080
     ports:
       - "3000:3000"
     depends_on:
@@ -29,12 +25,10 @@ services:
     container_name: vaultkit-funl
     env_file:
       - ./secrets/.env
-    environment:
-      VKIT_PUBLIC_KEY: /secrets/keys/vkit_pub.pem
-    volumes:
-      - ./secrets/keys/vkit_pub.pem:/secrets/keys/vkit_pub.pem:ro
     ports:
       - "8080:8080"
+    volumes:
+      - ./secrets/keys/vkit_pub.pem:/secrets/keys/vkit_pub.pem:ro
     restart: unless-stopped
 
   postgres:
@@ -42,6 +36,8 @@ services:
     container_name: vaultkit-db
     env_file:
       - ./secrets/.env
+    ports:
+      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
 
