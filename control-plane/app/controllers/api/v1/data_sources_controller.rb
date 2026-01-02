@@ -31,7 +31,7 @@ class Api::V1::DataSourcesController < Api::BaseController
     if ds.save
       render json: serialize(ds), status: :created
     else
-      render json: { errors: ds.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: ds.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -40,7 +40,7 @@ class Api::V1::DataSourcesController < Api::BaseController
     if @data_source.save
       render json: serialize(@data_source)
     else
-      render json: { errors: @data_source.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @data_source.errors.full_messages }, status: :unprocessable_content
     end
   end
 

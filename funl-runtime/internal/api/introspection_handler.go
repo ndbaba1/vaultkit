@@ -31,9 +31,7 @@ func IntrospectHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // ------------------------------------------------------------
     // Parse request body
-    // ------------------------------------------------------------
     var req IntrospectRequest
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
         logger.Error("invalid JSON", "error", err)
@@ -41,9 +39,7 @@ func IntrospectHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // ------------------------------------------------------------
     // Extract role from JWT claims (already validated in router)
-    // ------------------------------------------------------------
     role := middleware.GetJWTRole(r.Context())
     if role == "" {
         http.Error(w, "missing claims", http.StatusUnauthorized)
@@ -55,9 +51,7 @@ func IntrospectHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // ------------------------------------------------------------
     // Select introspector
-    // ------------------------------------------------------------
     insp, err := introspection.SelectIntrospector(req.Datasource.Engine)
     if err != nil {
         logger.Error("unsupported engine", "error", err)
@@ -65,9 +59,7 @@ func IntrospectHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // ------------------------------------------------------------
     // Run introspection based on kind
-    // ------------------------------------------------------------
     var rows []map[string]any
 
     switch req.Kind {
@@ -112,9 +104,7 @@ func IntrospectHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // ------------------------------------------------------------
     // Build response
-    // ------------------------------------------------------------
     durationMs := time.Since(start).Milliseconds()
 
     resp := map[string]any{

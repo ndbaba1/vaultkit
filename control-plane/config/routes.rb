@@ -10,7 +10,24 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :data_sources, only: [:index, :show, :create, :update]
+      resources :orgs, param: :org_slug, only: [] do
+        resources :datasources, only: [:index, :show, :create, :update] do
+          resource :scan, only: [:create], controller: "datasources/scans"
+        end
+        resources :scans, only: [:create]
+        resources :policy_bundles, only: [:create], param: :bundle_version do
+          post :activate, on: :member
+          post :rollback, on: :member
+        end
+        resources :requests, only: [:create, :index]
+        resources :approvals, only: [:index] do
+          post :approve, on: :member
+          post :deny,    on: :member
+        end
+        resources :grants, only: [] do
+          post :fetch, on: :member
+        end
+      end
     end
   end
 
@@ -21,4 +38,7 @@ Rails.application.routes.draw do
       sessions: 'api/users/sessions',
       registrations: 'api/users/registrations'
     }
+
+    match "/404", to: "api/v1/base#not_found", via: :all
+    match "/500", to: "api/v1/base#internal_error", via: :all  
 end

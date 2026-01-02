@@ -8,10 +8,8 @@ module AuthenticateRequest
   private
 
   def authenticate_request
-    bearer = request.headers["Authorization"]&.split("Bearer ")&.last
-    api_key = request.headers["X-API-Key"]
-
-    if bearer.present?
+    if jwt_present?
+      authenticate_user! # Devise helper, sets current_user
       if current_user&.organization
         Current.organization = current_user.organization
       else
@@ -20,8 +18,8 @@ module AuthenticateRequest
       return
     end
 
-    if api_key.present?
-      token = AccessToken.verify(api_key)
+    if api_key_present?
+      token = AccessToken.verify(api_key_header)
       if token
         Current.organization = token.organization
       else
@@ -31,5 +29,18 @@ module AuthenticateRequest
     end
 
     render json: { error: "Missing credentials" }, status: :unauthorized
+  end
+
+  # Helpers
+  def jwt_present?
+    request.headers["Authorization"]&.start_with?("Bearer ")
+  end
+
+  def api_key_present?
+    request.headers["X-API-Key"].present?
+  end
+
+  def api_key_header
+    request.headers["X-API-Key"]
   end
 end

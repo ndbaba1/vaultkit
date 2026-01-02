@@ -6,6 +6,10 @@ services:
     container_name: vaultkit-control-plane
     env_file:
       - ./secrets/.env
+    environment:
+      RAILS_ENV: development
+      VKIT_PRIVATE_KEY: /secrets/keys/vkit_priv.pem
+      FUNL_URL: http://funl-runtime:8080
     ports:
       - "3000:3000"
     depends_on:
@@ -14,7 +18,10 @@ services:
       funl-runtime:
         condition: service_started
     volumes:
-      - ../control-plane:/app
+      - ../control-plane:/rails
+      - ./secrets/keys/vkit_priv.pem:/secrets/keys/vkit_priv.pem:ro
+    stdin_open: true
+    tty: true
     command: bash -c "bundle exec rails s -b 0.0.0.0"
 
   funl-runtime:
@@ -23,9 +30,9 @@ services:
     env_file:
       - ./secrets/.env
     environment:
-      VKIT_PUBLIC_KEY: /secrets/vkit_pub.pem
+      VKIT_PUBLIC_KEY: /secrets/keys/vkit_pub.pem
     volumes:
-      - ./secrets/vkit_pub.pem:/secrets/vkit_pub.pem:ro
+      - ./secrets/keys/vkit_pub.pem:/secrets/keys/vkit_pub.pem:ro
     ports:
       - "8080:8080"
     restart: unless-stopped
